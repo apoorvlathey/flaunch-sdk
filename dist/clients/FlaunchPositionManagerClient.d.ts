@@ -1,5 +1,6 @@
 import { type ReadContract, type Address, type Drift, type EventLog, type ReadWriteContract, type ReadWriteAdapter, HexString } from "@delvtech/drift";
 import { FlaunchPositionManagerAbi } from "../abi/FlaunchPositionManager";
+import { type Hex } from "viem";
 import { IPFSParams } from "../types";
 export type FlaunchPositionManagerABI = typeof FlaunchPositionManagerAbi;
 export type PoolCreatedLog = EventLog<FlaunchPositionManagerABI, "PoolCreated"> & {
@@ -84,6 +85,13 @@ export declare class ReadFlaunchPositionManager {
         cleanup: () => void;
         pollPoolCreatedNow: () => Promise<void>;
     }>;
+    /**
+     * Parses a transaction hash to extract PoolSwap events and return parsed swap data
+     * @param txHash - The transaction hash to parse
+     * @param flETHIsCurrencyZero - Whether flETH is currency 0 in the pool (optional)
+     * @returns Parsed swap log or undefined if no PoolSwap event found
+     */
+    parseSwapTx(txHash: Hex, flETHIsCurrencyZero?: boolean): Promise<PoolSwapLog | undefined>;
     watchPoolSwap<T extends boolean | undefined = undefined>({ onPoolSwap, flETHIsCurrencyZero, startBlockNumber, filterByPoolId, }: WatchPoolSwapParams<T>): Promise<{
         cleanup: () => void;
         pollPoolSwapNow: () => Promise<void>;

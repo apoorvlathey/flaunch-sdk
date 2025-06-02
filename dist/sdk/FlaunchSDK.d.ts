@@ -1,4 +1,5 @@
 import { Drift, HexString, ReadWriteAdapter, type Address } from "@delvtech/drift";
+import { Hex } from "viem";
 import { ReadFlaunchPositionManager, ReadWriteFlaunchPositionManager, WatchPoolCreatedParams, WatchPoolSwapParams as WatchPoolSwapParamsPositionManager } from "../clients/FlaunchPositionManagerClient";
 import { ReadPoolManager, PositionInfoParams } from "../clients/PoolManagerClient";
 import { ReadStateView } from "../clients/StateViewClient";
@@ -21,6 +22,34 @@ import { CoinMetadata, FlaunchVersion } from "types";
 import { PermitSingle } from "utils/universalRouter";
 type WatchPoolSwapParams = Omit<WatchPoolSwapParamsPositionManager<boolean>, "flETHIsCurrencyZero"> & {
     filterByCoin?: Address;
+};
+type GenericBaseSwapLog = {
+    timestamp: number;
+    transactionHash: Hex;
+    blockNumber: bigint;
+    args: any;
+};
+type GenericBuySwapLog = GenericBaseSwapLog & {
+    type: "BUY";
+    delta: {
+        coinsBought: bigint;
+        flETHSold: bigint;
+        fees: {
+            isInFLETH: boolean;
+            amount: bigint;
+        };
+    };
+};
+type GenericSellSwapLog = GenericBaseSwapLog & {
+    type: "SELL";
+    delta: {
+        coinsSold: bigint;
+        flETHBought: bigint;
+        fees: {
+            isInFLETH: boolean;
+            amount: bigint;
+        };
+    };
 };
 type BuyCoinBase = {
     coinAddress: Address;
@@ -435,6 +464,21 @@ export declare class ReadFlaunchSDK {
      * @param resolverFn - Custom function to resolve IPFS URIs
      */
     setIPFSResolver(resolverFn: (ipfsHash: string) => string): void;
+    /**
+     * Parses a transaction hash to extract PoolSwap events and return parsed swap data
+     * @param params - Object containing parsing parameters
+     * @param params.txHash - The transaction hash to parse
+     * @param params.version - The Flaunch version to use for parsing
+     * @param params.flETHIsCurrencyZero - Whether flETH is currency 0 in the pool (optional)
+     * @returns Parsed swap log or undefined if no PoolSwap event found.
+     *          If flETHIsCurrencyZero is provided, returns typed swap data with BUY/SELL information.
+     *          If flETHIsCurrencyZero is undefined, returns basic swap log without parsed delta.
+     */
+    parseSwapTx<T extends boolean | undefined = undefined>(params: {
+        txHash: Hex;
+        version: FlaunchVersion;
+        flETHIsCurrencyZero?: T;
+    }): Promise<T extends boolean ? GenericBuySwapLog | GenericSellSwapLog | undefined : GenericBaseSwapLog | undefined>;
 }
 export declare class ReadWriteFlaunchSDK extends ReadFlaunchSDK {
     drift: Drift<ReadWriteAdapter>;
