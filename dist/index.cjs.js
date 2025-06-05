@@ -5335,8 +5335,7 @@ const FeeEscrowAddress = {
 };
 const ReferralEscrowAddress = {
     [base.id]: "0xBD39c7Be6D98BD1a3e4Ad482baF99d738947fE55",
-    // FIXME: this is temp address
-    [baseSepolia.id]: "0x651c203C4fc420f1652b0445642a21a7F1eF814E",
+    [baseSepolia.id]: "0xd3d9047CaBE3346C70b510435866565176e8CE12",
 };
 const FLETHAddress = {
     [base.id]: "0x000000000D564D5be76f7f0d28fE52605afC7Cf8",
@@ -8243,7 +8242,7 @@ class ReadFlaunchPositionManager {
                                 timestamp,
                             };
                         }
-                        // Use the utility function to parse swap data
+                        // parse swap data
                         const swapData = parseSwapData(log.args, flETHIsCurrencyZero);
                         return {
                             ...log,
